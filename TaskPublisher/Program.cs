@@ -23,7 +23,7 @@ var queueName = rabbitMQConfig.GetSection("MessageQueue").Value;
 
 chan.QueueDeclare(
   queue: queueName,
-  durable: false,
+  durable: true,
   exclusive: false,
   autoDelete: false,
   arguments: null
@@ -35,10 +35,13 @@ var message = (args.Length > 0)
 
 var body = Encoding.UTF8.GetBytes(message);
 
+var properties = chan.CreateBasicProperties();
+properties.Persistent = true;
+
 chan.BasicPublish(
   exchange: string.Empty,
   routingKey: queueName,
-  basicProperties: null,
+  basicProperties: properties,
   body: body
 );
 

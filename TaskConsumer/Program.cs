@@ -24,10 +24,16 @@ var queueName = rabbitMQConfig.GetSection("MessageQueue").Value;
 
 chan.QueueDeclare(
   queue: queueName,
-  durable: false,
+  durable: true,
   exclusive: false,
   autoDelete: false,
   arguments: null
+);
+
+chan.BasicQos(
+  prefetchSize: 0,
+  prefetchCount: 1,
+  global: false
 );
 
 Console.WriteLine(" [*] Waiting for messages.");
@@ -46,11 +52,16 @@ consumer.Received += (model, ea) =>
   Thread.Sleep(dots * 1000);
 
   Console.WriteLine(" [x] Done");
+
+  chan.BasicAck(
+    deliveryTag: ea.DeliveryTag,
+    multiple: false
+  );
 };
 
 chan.BasicConsume(
   queue: queueName,
-  autoAck: true,
+  autoAck: false,
   consumer: consumer
   );
 
